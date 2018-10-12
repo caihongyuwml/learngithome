@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <audio id="myaudio"></audio>
     <!--头部header-->
     <div class="header">
       <div class="header-warpper">
@@ -26,12 +27,12 @@
       <transition name="side">
         <div class="menu-content" v-show="isReallShow" >
           <div class="menu-detail">
-            <div class="menu-userInfo" style="background-image: url(/static/images/indeximg.jpg); background-size: cover;">
-              <img class="avatar" src="/static/images/userlogo.jpg" width="56" height="56">
+            <div class="menu-userInfo":style="{ backgroundImage: 'url(' + info.bg + ')',backgroundSize: 'cover' }">
+              <img class="avatar" :src="info.avatar" width="56" height="56">
               <div class="user-detail">
-                <span class="name">梦林123梦林</span>
+                <span class="name">{{info.name}}</span>
                 <img class="isvip" src="/static/images/vip.png" alt="">
-                <span class="progress">Lv.3</span>
+                <span class="progress">Lv.{{info.grade}}</span>
               </div>
               <span class="sign" @click="signClick"><i v-show="showIcon" class="icon-coin"></i>{{sign}}</span>
             </div>
@@ -69,30 +70,24 @@
         </div>
       </transition>
     </div>
-    <!--<div class="mymusic">-->
-      <!--<div class="typelist">-->
-        <!--<i class="info icon-wangyi" ></i>-->
-        <!--<div class="typelist-detail">-->
-          <!--<span class="name ">我的音乐</span>-->
-          <!--<span class="count">(28)</span>-->
-          <!--<p class="border-1px"></p>-->
-          <!--<i class="isPlaying icon-volume-medium"></i>-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</div>-->
+    <my-music></my-music>
+    <bottom-bar></bottom-bar>
   </div>
 </template>
 
 <script>
   import split from './components/split'
   import sidelist from './components/sidelist'
+  import mymusic from './components/mymusic.vue'
+  import bottombar from './components/bottombar.vue'
+  import Vue from 'vue'
+  import axios from 'axios'
+  import Vueaxios from 'vue-axios'
+
+  Vue.use(Vueaxios, axios)
 export default {
   props:{
     showMenus:{
-      type:Boolean,
-      default:false
-    },
-    isShow:{
       type:Boolean,
       default:false
     }
@@ -100,8 +95,11 @@ export default {
   data(){
     return{
       showIcon:true,
+      info:{},
+      musicAllList:{},
       sign:"签到",
-      isShowMenus:this.showMenus
+      isShowMenus:this.showMenus,
+      isShow:false
     }
   },
   methods:{
@@ -113,8 +111,7 @@ export default {
     },
     signClick(){
       this.sign = '已签到'
-      this.showIcon = false
-
+      this.showIcon = false;
     }
   },
   computed:{
@@ -124,7 +121,17 @@ export default {
   },
   components:{
     sidelist: sidelist,
-    split:split
+    split:split,
+    'my-music':mymusic,
+    'bottom-bar':bottombar
+  },
+  created(){
+    let LocalAPI = 'static/data.json'
+    axios.get(LocalAPI).then((res) => {
+      this.info = res.data.user
+    },(err) =>{
+      alert(err)
+    })
   }
 }
 </script>
@@ -135,10 +142,10 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
 }
+/*头部*/
   .header{
     background: #C62F2F;
     position: fixed;
@@ -146,9 +153,12 @@ export default {
     right:0;
     left:0;
     height:50px;
+    z-index:10;
   }
   .header-warpper{
+    height:100%;
     display:flex;
+    background: #C62F2F ;
     justify-content: space-between;
     align-items: center;
   }
@@ -164,18 +174,26 @@ export default {
     margin:0 5px;
     color: #eeeeee;
   }
+  .router-link :active{
+    color:#4AE0A8;
+  }
+  .music{
+    font-size:22px;
+  }
   i:active{
     color:#ccafaf;
   }
-
-
+/*侧边栏*/
   .menu-mask {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
+    opacity: 1;
+    z-index: 10;
     background: rgba(0, 0, 0, 0.5);
+    transform: translateZ(0);
   }
   .menu-content{
     position: fixed;
@@ -184,7 +202,10 @@ export default {
     top:0;
     left:0;
     bottom:0;
+    z-index: 11;
+    overflow-y: auto;
     background: #ffffff;
+    overflow-scrolling: touch;
   }
   .menu-userInfo{
     box-sizing: border-box;
@@ -265,6 +286,7 @@ export default {
     height:40px;
     width:286px;
     font-size:0;
+    transfrom:translateZ(0)
   }
   .footer div{
     display: inline-block;
@@ -293,34 +315,4 @@ export default {
     line-height:40px;
   }
 
-  /*.name{*/
-    /*color: #333333;*/
-    /*font-size:14px;*/
-    /*margin-right:6px;*/
-    /*vertical-align: middle;*/
-  /*}*/
-  /*.count{*/
-    /*color: #aaaaaa;*/
-    /*font-size:10px;*/
-    /*font-weight:400;*/
-    /*vertical-align: middle;*/
-  /*}*/
-  /*.border-1px{*/
-    /*border: rgba(7, 17, 27, 0.1);*/
-  /*}*/
-  /*.isPlaying{*/
-    /*font-size:14px;*/
-    /*position: absolute;*/
-    /*top:50%;*/
-    /*color:#C62F2F;*/
-    /*right:5px;*/
-    /*width:36px;*/
-    /*height:36px;*/
-    /*line-height:36px;*/
-    /*text-align: center;*/
-    /*transform: translate(0,-50%);*/
-  /*}*/
-  /*.isPlaying:active{*/
-    /*background: #d5d5d5 ;*/
-  /*}*/
 </style>
