@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <audio id="myaudio"></audio>
+    <!--<audio id="myaudio" ref="audio" @timeupdate="musicTimeUpdate" @canplay="musicCanPlay" @playing="musicOnPlaying" @ended="musicEnded" @waiting="musicOnWaiting" @pause="musicOnPause" @loadstart="loadStart">-->
     <!--头部header-->
     <div class="header">
       <div class="header-warpper">
@@ -83,8 +83,13 @@
   import Vue from 'vue'
   import axios from 'axios'
   import Vueaxios from 'vue-axios'
+  import Vuex from 'vuex'
+  import store from './store'
 
+  Vue.use(Vuex)
   Vue.use(Vueaxios, axios)
+
+  let musicLrcIndex = 0
 export default {
   props:{
     showMenus:{
@@ -128,7 +133,19 @@ export default {
   created(){
     let LocalAPI = 'static/data.json'
     axios.get(LocalAPI).then((res) => {
+      //把用户的信息赋值给info
       this.info = res.data.user
+
+      //所有音乐数据给vuex的musicAllList
+      store.dispatch('set_MusicAllList',res.data.music)
+
+      store.dispatch('set_AllInfo',res.data)
+
+      // 设置音乐的地址  初始化 根据vuex的currentIndex来决定
+      // this.$refs.audio.setAttribute('src',store.getters.getCurrentMusic.url)
+
+      // 给audio元素存在vuex 的state里面  方便日后调用
+      store.dispatch('set_AudioElement', this.$refs.audio)
     },(err) =>{
       alert(err)
     })

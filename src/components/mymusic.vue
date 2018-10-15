@@ -35,7 +35,6 @@
         let LocalAPI = 'static/data.json'
         axios.get(LocalAPI).then((res) => {
           this.musicAllList = res.data.music
-          console.log(this.musicAllList.sheets)
         },(err) =>{
           alert(err)
         })
